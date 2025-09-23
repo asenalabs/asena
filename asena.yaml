@@ -1,0 +1,26 @@
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+#       Asena configuration       #
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+#asena:
+#  enable_https: false
+#  tls_cert_file:
+#  tls_key_file:
+
+#log:
+#  lumberjack:
+#    path:
+#    max_size:
+#    max_backups:
+#    max_age:
+#    compress:
+
+#proxy_transport:
+#  dail_timeout:
+#  dail_keepalive:
+#  force_http2:
+#  max_idle_conn:
+#  max_idle_conn_per_host:
+#  idle_conn_timeout:
+#  tls_handshake_timeout:
+#  expect_continue_timeout:
