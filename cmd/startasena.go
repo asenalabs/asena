@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	version             = "0.0.4"
-	env                 = "production" //	development | production
+	version             = "0.0.5"
+	env                 = "development" //	development | production
 	asenaConfigFilePath = "asena.yaml"
 )
 

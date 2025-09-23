@@ -85,8 +85,6 @@ func Get() *zap.Logger {
 
 func Sync() {
 	if logg != nil {
-		if err := logg.Sync(); err != nil {
-			panic("Failed to sync logger: " + err.Error())
-		}
+		_ = logg.Sync()
 	}
 }
