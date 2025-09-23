@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	version             = "0.0.3"
-	env                 = "development" //	development | production
+	version             = "0.0.4"
+	env                 = "production" //	development | production
 	asenaConfigFilePath = "asena.yaml"
 )
 
@@ -23,6 +23,11 @@ func StartAsena() {
 		logg.Fatal("Failed to initialize Asena configurations", zap.Error(err))
 	}
 	asenaCfg := asenaConfigService.Get()
+
+	//	Switch logger according to config
+	logger.InitProductionZapLogger(env, asenaCfg.Log)
+	logg = logger.Get()
+	defer logger.Sync()
 
 	logg.Info("Starting asena", zap.String("version", version), zap.String("env", env))
 	logg.Info("Asena configuration", zap.Bool("enable https", *asenaCfg.Asena.EnableHTTPS))
