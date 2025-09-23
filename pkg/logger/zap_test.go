@@ -1,8 +1,13 @@
 package logger
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
+	"time"
 
+	"github.com/asenalabs/asena/internal/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
@@ -51,4 +56,46 @@ func TestSyncDoesNotPanic(t *testing.T) {
 		}
 	}()
 	Sync()
+}
+
+func TestInitProductionZapLogger(t *testing.T) {
+	tmpDir := t.TempDir()
+	logFile := filepath.Join(tmpDir, "access.log")
+
+	path := logFile
+	maxSize := 1 // MB
+	maxBackups := 1
+	maxAge := 1 // days
+	compress := false
+
+	cfg := &config.LogCfg{
+		Lumberjack: &config.LumberjackCfg{
+			Path:       &path,
+			MaxSize:    &maxSize,
+			MaxBackups: &maxBackups,
+			MaxAge:     &maxAge,
+			Compress:   &compress,
+		},
+	}
+
+	InitProductionZapLogger("production", cfg)
+	log := Get()
+
+	wantMsg := "production zap logger initialized"
+	log.Info(wantMsg)
+	Sync()
+
+	time.Sleep(100 * time.Millisecond)
+	data, err := os.ReadFile(logFile)
+	if err != nil {
+		t.Fatalf("failed to read log file: %v", err)
+	}
+
+	if !strings.Contains(string(data), wantMsg) {
+		t.Errorf("log file does not contain expected message: \nGot: %s", wantMsg)
+	}
+
+	if !strings.Contains(string(data), `"level":"INFO"`) && !strings.Contains(string(data), `"level":"INFO"`) {
+		t.Errorf("log is not JSON formatted: %s", string(data))
+	}
 }
