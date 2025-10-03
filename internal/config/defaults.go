@@ -2,8 +2,11 @@ package config
 
 import (
 	"crypto/tls"
+	"fmt"
 	"time"
 )
+
+// ============================== Static ==============================
 
 var (
 	portHTTP                = ":80"
@@ -109,4 +112,87 @@ func normalizeProxyTransportCfg(cfg *ProxyTransportCfg) {
 	if cfg.TLSMinVersion == nil {
 		cfg.TLSMinVersion = &ptTLSMinVersion
 	}
+}
+
+// ============================== Dynamic ==============================
+
+var (
+	roundRobin = "round-robin"
+	//weightedRoundRobin = "weighted-round-robin"
+	flashInterval       = 500 * time.Millisecond
+	passHostHeaderFalse = false
+)
+
+func setDynamicConfigs(cfg *DynamicConfig) error {
+	if err := validateHTTPCfg(cfg.HTTP); err != nil {
+		return err
+	}
+
+	for _, s := range cfg.HTTP.Services {
+		normalizeServicesCfg(s)
+		if err := validateServiceCfg(s); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func validateHTTPCfg(cfg *HTTPCfg) error {
+	if cfg == nil {
+		return errMissing("http")
+	}
+	if cfg.Routers == nil {
+		return errMissing("routers")
+	}
+	if cfg.Services == nil {
+		return errMissing("services")
+	}
+	return nil
+}
+
+func validateServiceCfg(cfg *ServiceCfg) error {
+	if cfg == nil || cfg.LoadBalancer == nil {
+		return errMissing("load_balancer")
+	}
+	if cfg.LoadBalancer.Servers == nil || len(cfg.LoadBalancer.Servers) == 0 {
+		return errMissing("load_balancer.servers")
+	}
+	if err := validateServiceAlgorithm(cfg.LoadBalancer.Algorithm); err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateServiceAlgorithm(alg *string) error {
+	if alg == nil {
+		return fmt.Errorf("invalid dynamic configuration: algorithm is not set")
+	}
+
+	algorithms := map[string]uint{
+		roundRobin: 1,
+		// weightedRoundRobin: 2,
+	}
+
+	if _, found := algorithms[*alg]; !found {
+		return fmt.Errorf("invalid dynamic configuration: unknown algorithm: %s (see docs: DYNAMIC_CONFIG.md)", *alg)
+	}
+
+	return nil
+}
+
+func normalizeServicesCfg(cfg *ServiceCfg) {
+	if cfg.LoadBalancer.Algorithm == nil {
+		cfg.LoadBalancer.Algorithm = &roundRobin
+	}
+	if cfg.LoadBalancer.FlashInterval == nil {
+		cfg.LoadBalancer.FlashInterval = &flashInterval
+	}
+	if cfg.LoadBalancer.PassHostHeader == nil {
+		cfg.LoadBalancer.PassHostHeader = &passHostHeaderFalse
+	}
+}
+
+func errMissing(section string) error {
+	return fmt.Errorf("invalid dynamic configuration: %s section is missing (see DYNAMIC_CONFIG.md)", section)
 }
