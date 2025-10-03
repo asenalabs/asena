@@ -144,16 +144,19 @@ func TestValidateServiceAlgorithm(t *testing.T) {
 }
 
 func TestNormalizeServicesCfg(t *testing.T) {
-	cfg := &ServiceCfg{LoadBalancer: &LoadBalancerCfg{}}
+	cfg := &ServiceCfg{} // load_balancer not defined
 	normalizeServicesCfg(cfg)
 
+	if cfg.LoadBalancer == nil {
+		t.Fatal("expected LoadBalancer to be initialized, got nil")
+	}
 	if cfg.LoadBalancer.Algorithm == nil || *cfg.LoadBalancer.Algorithm != roundRobin {
-		t.Errorf("expected default algorithm %s, got %v", roundRobin, cfg.LoadBalancer.Algorithm)
+		t.Errorf("expected Algorithm=roundRobin, got %v", cfg.LoadBalancer.Algorithm)
 	}
 	if cfg.LoadBalancer.FlashInterval == nil || *cfg.LoadBalancer.FlashInterval != flashInterval {
-		t.Errorf("expected default flash interval %v, got %v", flashInterval, cfg.LoadBalancer.FlashInterval)
+		t.Errorf("expected FlashInterval=%v, got %v", flashInterval, cfg.LoadBalancer.FlashInterval)
 	}
 	if cfg.LoadBalancer.PassHostHeader == nil || *cfg.LoadBalancer.PassHostHeader != passHostHeaderFalse {
-		t.Errorf("expected default passHostHeader %v, got %v", passHostHeaderFalse, *cfg.LoadBalancer.PassHostHeader)
+		t.Errorf("expected PassHostHeader=%v, got %v", passHostHeaderFalse, cfg.LoadBalancer.PassHostHeader)
 	}
 }
