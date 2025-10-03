@@ -182,6 +182,10 @@ func validateServiceAlgorithm(alg *string) error {
 }
 
 func normalizeServicesCfg(cfg *ServiceCfg) {
+	if cfg.LoadBalancer == nil {
+		cfg.LoadBalancer = &LoadBalancerCfg{}
+	}
+
 	if cfg.LoadBalancer.Algorithm == nil {
 		cfg.LoadBalancer.Algorithm = &roundRobin
 	}
