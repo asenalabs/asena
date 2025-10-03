@@ -40,3 +40,35 @@ type ProxyTransportCfg struct {
 	ExpectContinueTimeout *time.Duration `yaml:"expect_continue_timeout,omitempty"`
 	TLSMinVersion         *uint16
 }
+
+// ============================== Dynamic ==============================
+
+type DynamicConfig struct {
+	HTTP *HTTPCfg `yaml:"http,omitempty"`
+}
+
+type HTTPCfg struct {
+	Routers  map[string]*RoutersCfg `yaml:"routers,omitempty"`
+	Services map[string]*ServiceCfg `yaml:"services,omitempty"`
+}
+
+type RoutersCfg struct {
+	Rule    *string `yaml:"rule,omitempty"`
+	Service *string `yaml:"service,omitempty"`
+}
+
+type ServiceCfg struct {
+	LoadBalancer *LoadBalancerCfg `yaml:"load_balancer,omitempty"`
+}
+
+type LoadBalancerCfg struct {
+	Algorithm      *string        `yaml:"algorithm,omitempty"`
+	FlashInterval  *time.Duration `yaml:"flash_interval,omitempty"`
+	PassHostHeader *bool          `yaml:"pass_host_header,omitempty"`
+	Servers        []*ServerCfg   `yaml:"servers,omitempty"`
+}
+
+type ServerCfg struct {
+	URL    *string `yaml:"url,omitempty"`
+	Weight *uint   `yaml:"weight,omitempty"`
+}

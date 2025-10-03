@@ -1,6 +1,11 @@
 package config
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
+
+// ============================== Static ==============================
 
 func TestNormalizeAsenaCfg_defaults(t *testing.T) {
 	cfg := &AsenaCfg{}
@@ -38,5 +43,117 @@ func TestNormalizeProxyTransportCfg_defaults(t *testing.T) {
 	}
 	if cfg.TLSHandshakeTimeout == nil || *cfg.TLSHandshakeTimeout != ptTLSHandshakeTimeout {
 		t.Errorf("expected dafault TLS handshake timeout %s, got %v", ptTLSHandshakeTimeout, cfg.TLSHandshakeTimeout)
+	}
+}
+
+// ============================== Dynamic ==============================
+
+func TestValidateHTTPCfg(t *testing.T) {
+	tests := []struct {
+		name    string
+		cfg     *HTTPCfg
+		wantErr string
+	}{
+		{"missing http", nil, "http section is missing"},
+		{"missing routers", &HTTPCfg{}, "routers section is missing"},
+		{"missing services", &HTTPCfg{Routers: map[string]*RoutersCfg{}}, "services section is missing"},
+		{"valid config", &HTTPCfg{Routers: map[string]*RoutersCfg{}, Services: map[string]*ServiceCfg{}}, ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateHTTPCfg(tt.cfg)
+			if tt.wantErr == "" {
+				if err != nil {
+					t.Errorf("unexpected error %v", err)
+				}
+			} else {
+				if err == nil || !strings.Contains(err.Error(), tt.wantErr) {
+					t.Errorf("expected error %v, got %v", tt.wantErr, err)
+				}
+			}
+		})
+	}
+}
+
+func TestValidateServiceCfg(t *testing.T) {
+	url := "http://localhost:9000"
+	alg := roundRobin
+
+	tests := []struct {
+		name    string
+		cfg     *ServiceCfg
+		wantErr string
+	}{
+		{"missing load balancer", nil, "load_balancer section is missing"},
+		{"missing servers", &ServiceCfg{LoadBalancer: &LoadBalancerCfg{}}, "load_balancer.servers section is missing"},
+		{"valid config", &ServiceCfg{
+			LoadBalancer: &LoadBalancerCfg{
+				Algorithm: &alg,
+				Servers: []*ServerCfg{
+					{URL: &url},
+				},
+			},
+		}, ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateServiceCfg(tt.cfg)
+			if tt.wantErr == "" {
+				if err != nil {
+					t.Errorf("unexpected error %v", err)
+				}
+			} else {
+				if err == nil || !strings.Contains(err.Error(), tt.wantErr) {
+					t.Errorf("expected error %v, got %v", tt.wantErr, err)
+				}
+			}
+		})
+	}
+}
+
+func TestValidateServiceAlgorithm(t *testing.T) {
+	badAlg := "no-algorithm"
+	goodAlg := roundRobin
+
+	tests := []struct {
+		name    string
+		alg     *string
+		wantErr string
+	}{
+		{"nil algorithm", nil, "algorithm is not set"},
+		{"unknown algorithm", &badAlg, "unknown algorithm"},
+		{"valid algorithm", &goodAlg, ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateServiceAlgorithm(tt.alg)
+			if tt.wantErr == "" {
+				if err != nil {
+					t.Errorf("unexpected error %v", err)
+				}
+			} else {
+				if err == nil || !strings.Contains(err.Error(), tt.wantErr) {
+					t.Errorf("expected error %v, got %v", tt.wantErr, err)
+				}
+			}
+		})
+	}
+}
+
+func TestNormalizeServicesCfg(t *testing.T) {
+	cfg := &ServiceCfg{LoadBalancer: &LoadBalancerCfg{}}
+	normalizeServicesCfg(cfg)
+
+	if cfg.LoadBalancer.Algorithm == nil || *cfg.LoadBalancer.Algorithm != roundRobin {
+		t.Errorf("expected default algorithm %s, got %v", roundRobin, cfg.LoadBalancer.Algorithm)
+	}
+	if cfg.LoadBalancer.FlashInterval == nil || *cfg.LoadBalancer.FlashInterval != flashInterval {
+		t.Errorf("expected default flash interval %v, got %v", flashInterval, cfg.LoadBalancer.FlashInterval)
+	}
+	if cfg.LoadBalancer.PassHostHeader == nil || *cfg.LoadBalancer.PassHostHeader != passHostHeaderFalse {
+		t.Errorf("expected default passHostHeader %v, got %v", passHostHeaderFalse, *cfg.LoadBalancer.PassHostHeader)
 	}
 }
