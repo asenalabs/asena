@@ -1,6 +1,8 @@
 package logger
 
 import (
+	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -87,4 +89,12 @@ func Sync() {
 	if logg != nil {
 		_ = logg.Sync()
 	}
+}
+
+func MustZapToStdLoggerAtLevel(z *zap.Logger, lvl zapcore.Level) *log.Logger {
+	l, err := zap.NewStdLogAt(z, lvl)
+	if err != nil {
+		panic(fmt.Sprintf("failed to adapt zap logger at %s: %v", lvl, err))
+	}
+	return l
 }
