@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	version               = "0.0.8"
+	version               = "0.0.9"
 	env                   = "development" //	development | production
 	asenaConfigFilePath   = "asena.yaml"
 	dynamicConfigFilePath = "dynamic.yaml"
