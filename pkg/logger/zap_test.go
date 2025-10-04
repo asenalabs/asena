@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -97,5 +98,46 @@ func TestInitProductionZapLogger(t *testing.T) {
 
 	if !strings.Contains(string(data), `"level":"INFO"`) && !strings.Contains(string(data), `"level":"INFO"`) {
 		t.Errorf("log is not JSON formatted: %s", string(data))
+	}
+}
+
+func TestMustZapToStdLoggerAtLevel(t *testing.T) {
+	tests := []struct {
+		name        string
+		level       zapcore.Level
+		shouldPanic bool
+	}{
+		{"valid debug", zapcore.DebugLevel, false},
+		{"valid info", zapcore.InfoLevel, false},
+		{"invalid level", zapcore.Level(100), true}, // intentionally invalid
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			z, _ := zap.NewDevelopment()
+
+			defer func() {
+				if r := recover(); r != nil {
+					if !tt.shouldPanic {
+						t.Errorf("unexpected panic: %v", r)
+					}
+				} else {
+					if tt.shouldPanic {
+						t.Errorf("expected panic but got none")
+					}
+				}
+			}()
+
+			l := MustZapToStdLoggerAtLevel(z, tt.level)
+			if !tt.shouldPanic && l == nil {
+				t.Error("expected *log.Logger, got nil")
+			}
+			if !tt.shouldPanic {
+				_, ok := interface{}(l).(*log.Logger)
+				if !ok {
+					t.Errorf("expected *log.Logger type, got %T", l)
+				}
+			}
+		})
 	}
 }
