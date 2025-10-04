@@ -37,7 +37,7 @@ func (m *CertManager) Load(certFile, keyFile string) error {
 	return nil
 }
 
-func (m *CertManager) GetCertificate(*tls.Certificate) (*tls.Certificate, error) {
+func (m *CertManager) GetCertificate(*tls.ClientHelloInfo) (*tls.Certificate, error) {
 	return m.Get()
 }
 
