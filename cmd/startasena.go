@@ -2,11 +2,14 @@ package cmd
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/asenalabs/asena/internal/config"
+	"github.com/asenalabs/asena/internal/server"
 	"github.com/asenalabs/asena/pkg/logger"
 	"go.uber.org/zap"
 )
@@ -16,6 +19,7 @@ var (
 	env                   = "development" //	development | production
 	asenaConfigFilePath   = "asena.yaml"
 	dynamicConfigFilePath = "dynamic.yaml"
+	gracefulShutdownTime  = 5 * time.Second
 )
 
 func StartAsena() {
@@ -50,6 +54,35 @@ func StartAsena() {
 		}
 	}()
 
-	logg.Info("Starting asena", zap.String("version", version), zap.String("env", env))
-	logg.Info("Asena configuration", zap.Bool("enable https", *asenaCfg.Asena.EnableHTTPS))
+	//	Local mux
+	mux := http.NewServeMux()
+
+	//	server configurations
+	srvCfg := server.ServerConfig{
+		Address:     *asenaCfg.Asena.Port,
+		Version:     version,
+		EnableHTTPS: *asenaCfg.Asena.EnableHTTPS,
+		CertFileTLS: *asenaCfg.Asena.TLSCertFile,
+		KeyFileTLS:  *asenaCfg.Asena.TLSKeyFile,
+		Proxy:       mux,
+		Logg:        logg,
+	}
+
+	srv, err := server.ServeHTTPS(&srvCfg)
+	if err != nil {
+		logg.Fatal("Failed to start server", zap.Error(err))
+	}
+
+	// Graceful shutdown
+	<-ctx.Done()
+	logg.Info("Asena server shutting down", zap.String("version", version), zap.Duration("timeout", gracefulShutdownTime))
+
+	shutDownCtx, cancel := context.WithTimeout(context.Background(), gracefulShutdownTime)
+	defer cancel()
+
+	if err := srv.Shutdown(shutDownCtx); err != nil {
+		logg.Warn("Asena server forced to shutdown", zap.String("version", version), zap.Error(err))
+	}
+
+	logg.Info("Asena server gracefully shutdown", zap.String("version", version))
 }
