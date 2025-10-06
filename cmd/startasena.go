@@ -62,6 +62,8 @@ func StartAsena() {
 	mux := http.NewServeMux()
 	handler.RegisterRoutes(pm, mux, logg)
 
+	wrappedMux := handler.LoggingMiddleware(logg, mux)
+
 	//	server configurations
 	srvCfg := server.ServerConfig{
 		Address:     *asenaCfg.Asena.Port,
@@ -69,7 +71,7 @@ func StartAsena() {
 		EnableHTTPS: *asenaCfg.Asena.EnableHTTPS,
 		CertFileTLS: *asenaCfg.Asena.TLSCertFile,
 		KeyFileTLS:  *asenaCfg.Asena.TLSKeyFile,
-		Proxy:       mux,
+		Proxy:       wrappedMux,
 		Logg:        logg,
 	}
 
