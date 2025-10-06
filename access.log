@@ -1,6 +1,0 @@
-2025-09-23T21:55:00.058+0500	INFO	cmd/startasena.go:32	Starting asena	{"version": "0.0.3", "env": "development"}
-2025-09-23T21:55:00.058+0500	INFO	cmd/startasena.go:33	Asena configuration	{"enable https": false}
-{"level":"INFO","timestamp":"2025-09-23T22:01:22.130+0500","caller":"cmd/startasena.go:32","msg":"Starting asena","version":"0.0.4","env":"production"}
-{"level":"INFO","timestamp":"2025-09-23T22:01:22.130+0500","caller":"cmd/startasena.go:33","msg":"Asena configuration","enable https":false}
-2025-09-23T22:24:07.078+0500	INFO	cmd/startasena.go:32	Starting asena	{"version": "0.0.5", "env": "development"}
-2025-09-23T22:24:07.078+0500	INFO	cmd/startasena.go:33	Asena configuration	{"enable https": false}
