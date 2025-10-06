@@ -52,7 +52,7 @@ func TestGetLoggerReturnsLogger(t *testing.T) {
 func TestSyncDoesNotPanic(t *testing.T) {
 	IntiFallbackZapLogger()
 	defer func() {
-		if r := recover(); r == nil {
+		if r := recover(); r != nil {
 			t.Fatalf("Sync panicked: %v", r)
 		}
 	}()
