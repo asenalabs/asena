@@ -117,8 +117,8 @@ func normalizeProxyTransportCfg(cfg *ProxyTransportCfg) {
 // ============================== Dynamic ==============================
 
 var (
-	roundRobin = "round-robin"
-	//weightedRoundRobin = "weighted-round-robin"
+	RoundRobin = "round-robin"
+	//WeightedRoundRobin = "weighted-round-robin"
 	flashInterval       = 500 * time.Millisecond
 	passHostHeaderFalse = false
 )
@@ -170,8 +170,8 @@ func validateServiceAlgorithm(alg *string) error {
 	}
 
 	algorithms := map[string]uint{
-		roundRobin: 1,
-		// weightedRoundRobin: 2,
+		RoundRobin: 1,
+		// WeightedRoundRobin: 2,
 	}
 
 	if _, found := algorithms[*alg]; !found {
@@ -187,7 +187,7 @@ func normalizeServicesCfg(cfg *ServiceCfg) {
 	}
 
 	if cfg.LoadBalancer.Algorithm == nil {
-		cfg.LoadBalancer.Algorithm = &roundRobin
+		cfg.LoadBalancer.Algorithm = &RoundRobin
 	}
 	if cfg.LoadBalancer.FlashInterval == nil {
 		cfg.LoadBalancer.FlashInterval = &flashInterval

@@ -78,7 +78,7 @@ func TestValidateHTTPCfg(t *testing.T) {
 
 func TestValidateServiceCfg(t *testing.T) {
 	url := "http://localhost:9000"
-	alg := roundRobin
+	alg := RoundRobin
 
 	tests := []struct {
 		name    string
@@ -115,7 +115,7 @@ func TestValidateServiceCfg(t *testing.T) {
 
 func TestValidateServiceAlgorithm(t *testing.T) {
 	badAlg := "no-algorithm"
-	goodAlg := roundRobin
+	goodAlg := RoundRobin
 
 	tests := []struct {
 		name    string
@@ -150,7 +150,7 @@ func TestNormalizeServicesCfg(t *testing.T) {
 	if cfg.LoadBalancer == nil {
 		t.Fatal("expected LoadBalancer to be initialized, got nil")
 	}
-	if cfg.LoadBalancer.Algorithm == nil || *cfg.LoadBalancer.Algorithm != roundRobin {
+	if cfg.LoadBalancer.Algorithm == nil || *cfg.LoadBalancer.Algorithm != RoundRobin {
 		t.Errorf("expected Algorithm=roundRobin, got %v", cfg.LoadBalancer.Algorithm)
 	}
 	if cfg.LoadBalancer.FlashInterval == nil || *cfg.LoadBalancer.FlashInterval != flashInterval {
