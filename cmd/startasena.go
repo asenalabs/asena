@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/asenalabs/asena/internal/config"
+	"github.com/asenalabs/asena/internal/handler"
 	"github.com/asenalabs/asena/internal/proxy"
 	"github.com/asenalabs/asena/internal/server"
 	"github.com/asenalabs/asena/pkg/logger"
@@ -59,6 +60,7 @@ func StartAsena() {
 
 	//	Local mux
 	mux := http.NewServeMux()
+	handler.RegisterRoutes(pm, mux, logg)
 
 	//	server configurations
 	srvCfg := server.ServerConfig{
