@@ -6,9 +6,8 @@
     asena is a lightweight web server with minimal configuration.
 </p>
 
----
 
-##  About
+##  🔷 About
 
 Asena is a lightweight reverse proxy with minimal configuration. It provides basic host-based routing and load balancing out of the box.
 
