@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/asenalabs/asena/internal/config"
+	"github.com/asenalabs/asena/internal/proxy"
 	"github.com/asenalabs/asena/internal/server"
 	"github.com/asenalabs/asena/pkg/logger"
 	"go.uber.org/zap"
@@ -48,9 +49,11 @@ func StartAsena() {
 		logg.Fatal("Failed to initialize dynamic configurations", zap.Error(err))
 	}
 
-	go func() {
-		for _ = range dynamicConfigService.Updates() {
+	pm := proxy.NewProxyManger(logg)
 
+	go func() {
+		for newDCfg := range dynamicConfigService.Updates() {
+			pm.BuildReverseProxy(newDCfg.HTTP, asenaCfg.ProxyTransport)
 		}
 	}()
 
