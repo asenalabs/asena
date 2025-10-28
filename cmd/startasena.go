@@ -17,10 +17,10 @@ import (
 )
 
 var (
-	version               = "0.1.8"
+	version               = "0.1.9"
 	env                   = "development" //	development | production
-	asenaConfigFilePath   = "asena.yaml"
-	dynamicConfigFilePath = "dynamic.yaml"
+	asenaConfigFilePath   = "/etc/asena/asena.yaml"
+	dynamicConfigFilePath = "/etc/asena/dynamic.yaml"
 	gracefulShutdownTime  = 5 * time.Second
 )
 
