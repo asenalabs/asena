@@ -23,17 +23,17 @@ func TestParse_AllFlagsProvided(t *testing.T) {
 
 	opts := Parse()
 
-	if *opts.PortHTTP != ":8080" {
-		t.Errorf("expected :8080, got %s", *opts.PortHTTP)
+	if opts.PortHTTP != ":8080" {
+		t.Errorf("expected :8080, got %s", opts.PortHTTP)
 	}
-	if *opts.PortHTTPS != ":8443" {
-		t.Errorf("expected :8443, got %s", *opts.PortHTTPS)
+	if opts.PortHTTPS != ":8443" {
+		t.Errorf("expected :8443, got %s", opts.PortHTTPS)
 	}
-	if *opts.SSLTLSPublicKey != "/path/cert.pem" {
-		t.Errorf("expected /path/cert.pem, got %s", *opts.SSLTLSPublicKey)
+	if opts.SSLTLSPublicKey != "/path/cert.pem" {
+		t.Errorf("expected /path/cert.pem, got %s", opts.SSLTLSPublicKey)
 	}
-	if *opts.SSLTLSPrivateKey != "/path/key.pem" {
-		t.Errorf("expected /path/key.pem, got %s", *opts.SSLTLSPrivateKey)
+	if opts.SSLTLSPrivateKey != "/path/key.pem" {
+		t.Errorf("expected /path/key.pem, got %s", opts.SSLTLSPrivateKey)
 	}
 }
 
@@ -43,16 +43,16 @@ func TestParse_NoFlagsProvided(t *testing.T) {
 
 	opts := Parse()
 
-	if *opts.PortHTTP != "" {
-		t.Errorf("expected empty PortHTTP, got %s", *opts.PortHTTP)
+	if opts.PortHTTP != "" {
+		t.Errorf("expected empty PortHTTP, got %s", opts.PortHTTP)
 	}
-	if *opts.PortHTTPS != "" {
-		t.Errorf("expected empty PortHTTPS, got %s", *opts.PortHTTPS)
+	if opts.PortHTTPS != "" {
+		t.Errorf("expected empty PortHTTPS, got %s", opts.PortHTTPS)
 	}
-	if *opts.SSLTLSPublicKey != "" {
-		t.Errorf("expected empty SSLTLSPublicKey, got %s", *opts.SSLTLSPublicKey)
+	if opts.SSLTLSPublicKey != "" {
+		t.Errorf("expected empty SSLTLSPublicKey, got %s", opts.SSLTLSPublicKey)
 	}
-	if *opts.SSLTLSPrivateKey != "" {
-		t.Errorf("expected empty SSLTLSPrivateKey, got %s", *opts.SSLTLSPrivateKey)
+	if opts.SSLTLSPrivateKey != "" {
+		t.Errorf("expected empty SSLTLSPrivateKey, got %s", opts.SSLTLSPrivateKey)
 	}
 }

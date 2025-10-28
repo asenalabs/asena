@@ -120,17 +120,17 @@ func normalizeProxyTransportCfg(cfg *ProxyTransportCfg) {
 }
 
 func setVariablesGotFromCLI(opts *cli.Options) {
-	if opts.PortHTTP != nil {
-		portHTTP = *opts.PortHTTP
+	if opts.PortHTTP != "" {
+		portHTTP = opts.PortHTTP
 	}
-	if opts.PortHTTPS != nil {
-		portHTTPS = *opts.PortHTTPS
+	if opts.PortHTTPS != "" {
+		portHTTPS = opts.PortHTTPS
 	}
-	if opts.SSLTLSPublicKey != nil {
-		certFile = *opts.SSLTLSPublicKey
+	if opts.SSLTLSPublicKey != "" {
+		certFile = opts.SSLTLSPublicKey
 	}
-	if opts.SSLTLSPrivateKey != nil {
-		keyFile = *opts.SSLTLSPrivateKey
+	if opts.SSLTLSPrivateKey != "" {
+		keyFile = opts.SSLTLSPrivateKey
 	}
 }
 

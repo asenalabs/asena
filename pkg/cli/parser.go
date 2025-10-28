@@ -7,19 +7,19 @@ import (
 )
 
 type Options struct {
-	PortHTTP         *string
-	PortHTTPS        *string
-	SSLTLSPublicKey  *string
-	SSLTLSPrivateKey *string
+	PortHTTP         string
+	PortHTTPS        string
+	SSLTLSPublicKey  string
+	SSLTLSPrivateKey string
 }
 
 func Parse() *Options {
-	opts := &Options{
-		PortHTTP:         flag.String("http-port", "", "HTTP port for Asena"),
-		PortHTTPS:        flag.String("https-port", "", "HTTPS port for Asena"),
-		SSLTLSPublicKey:  flag.String("cert-file", "", "Path to SSL/TLS certificate file"),
-		SSLTLSPrivateKey: flag.String("key-file", "", "Path to SSL/TLS private key file"),
-	}
+	var opts Options
+
+	flag.StringVar(&opts.PortHTTP, "http-port", "", "HTTP port for Asena")
+	flag.StringVar(&opts.PortHTTPS, "https-port", "", "HTTPS port for Asena")
+	flag.StringVar(&opts.SSLTLSPublicKey, "cert-file", "", "Path to SSL/TLS certificate file")
+	flag.StringVar(&opts.SSLTLSPrivateKey, "key-file", "", "Path to SSL/TLS private key file")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "\nUsage:\n    asena [flags]\n\nFlags:\n")
@@ -32,5 +32,5 @@ func Parse() *Options {
 		os.Exit(2)
 	}
 
-	return opts
+	return &opts
 }
