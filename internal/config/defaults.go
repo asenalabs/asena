@@ -16,7 +16,7 @@ var (
 	disableHTTPS            = false
 	certFile                = "/etc/letsencrypt/live/example.com/cert.pem"
 	keyFile                 = "/etc/letsencrypt/live/example.com/privkey.pem"
-	llPath                  = "access.log"
+	llPath                  = "/var/log/asena/asena.log"
 	llMaxSize               = 100 // MB
 	llMaxBackups            = 7
 	llMaxAge                = 30 // days
