@@ -4,6 +4,8 @@ import (
 	"crypto/tls"
 	"fmt"
 	"time"
+
+	"github.com/asenalabs/asena/pkg/cli"
 )
 
 // ============================== Static ==============================
@@ -43,6 +45,9 @@ func setAsenaConfigs(cfg *AsenaConfig) {
 	if cfg.ProxyTransport == nil {
 		cfg.ProxyTransport = &ProxyTransportCfg{}
 	}
+
+	cliOptions := cli.Parse()
+	setVariablesGotFromCLI(cliOptions)
 
 	normalizeAsenaCfg(cfg.Asena)
 	normalizeLogCfg(cfg.Log)
@@ -111,6 +116,21 @@ func normalizeProxyTransportCfg(cfg *ProxyTransportCfg) {
 	}
 	if cfg.TLSMinVersion == nil {
 		cfg.TLSMinVersion = &ptTLSMinVersion
+	}
+}
+
+func setVariablesGotFromCLI(opts *cli.Options) {
+	if opts.PortHTTP != nil {
+		portHTTP = *opts.PortHTTP
+	}
+	if opts.PortHTTPS != nil {
+		portHTTPS = *opts.PortHTTPS
+	}
+	if opts.SSLTLSPublicKey != nil {
+		certFile = *opts.SSLTLSPublicKey
+	}
+	if opts.SSLTLSPrivateKey != nil {
+		keyFile = *opts.SSLTLSPrivateKey
 	}
 }
 
