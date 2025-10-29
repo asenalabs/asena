@@ -48,7 +48,10 @@ func (acs *AsenaConfigService) load() error {
 	}
 
 	//	Set and normalize configurations
-	setAsenaConfigs(&cfg)
+	err = setAsenaConfigs(&cfg, acs.configFilePath)
+	if err != nil {
+		return err
+	}
 
 	acs.cfg = &cfg
 
