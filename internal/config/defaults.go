@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/asenalabs/asena/pkg/cli"
+	"github.com/asenalabs/asena/pkg/configwriter"
 )
 
 // ============================== Static ==============================
@@ -30,9 +31,13 @@ var (
 	ptTLSHandshakeTimeout   = 10 * time.Second
 	ptExpectContinueTimeout = 1 * time.Second
 	ptTLSMinVersion         = uint16(tls.VersionTLS12)
+
+	asenaConfigHeaderComment = `#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+#       Asena configuration       #
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#`
 )
 
-func setAsenaConfigs(cfg *AsenaConfig) {
+func setAsenaConfigs(cfg *AsenaConfig, asenaConfigFile string) error {
 	if cfg.Asena == nil {
 		cfg.Asena = &AsenaCfg{}
 	}
@@ -52,6 +57,12 @@ func setAsenaConfigs(cfg *AsenaConfig) {
 	normalizeAsenaCfg(cfg.Asena)
 	normalizeLogCfg(cfg.Log)
 	normalizeProxyTransportCfg(cfg.ProxyTransport)
+
+	err := configwriter.WriteConfig(asenaConfigFile, cfg, asenaConfigHeaderComment)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func normalizeAsenaCfg(cfg *AsenaCfg) {
