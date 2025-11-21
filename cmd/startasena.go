@@ -10,6 +10,7 @@ import (
 
 	"github.com/asenalabs/asena/internal/config"
 	"github.com/asenalabs/asena/internal/handler"
+	"github.com/asenalabs/asena/internal/middleware"
 	"github.com/asenalabs/asena/internal/proxy"
 	"github.com/asenalabs/asena/internal/server"
 	"github.com/asenalabs/asena/pkg/logger"
@@ -17,7 +18,7 @@ import (
 )
 
 var (
-	version               = "0.2.0"
+	version               = "0.2.1"
 	env                   = "development" //	development | production
 	asenaConfigFilePath   = "/etc/asena/asena.yaml"
 	dynamicConfigFilePath = "/etc/asena/dynamic.yaml"
@@ -62,7 +63,10 @@ func StartAsena() {
 	mux := http.NewServeMux()
 	handler.RegisterRoutes(pm, mux, logg)
 
-	wrappedMux := handler.LoggingMiddleware(logg, mux)
+	chain := middleware.New(
+		middleware.Logging(logg),
+	)
+	wrappedMux := chain.Then(mux)
 
 	//	server configurations
 	srvCfg := server.ServerConfig{
