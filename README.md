@@ -44,9 +44,16 @@ http:
 ## 🚀 Quick Start
 
 ```bash
-go run main.go
+git clone https://github.com/asenalabs/asena
+cd asena
+go build -o ./bin/asena
+chmod +x ./scripts/install.sh
+sudo ./scripts/install.sh 
 ```
-
+Copy and paste the above dynamic test configuration into the `/etc/asena/dynamic.yaml` file
+```bash
+sudo -u asena ./bin/asena -http-port :80
+```
 By default, Asena loads configuration from `asena.yaml` and `dynamic.yaml`.
 
 ## 🧪 Tests
