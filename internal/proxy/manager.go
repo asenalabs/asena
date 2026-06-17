@@ -85,24 +85,29 @@ func (pm *Manager) newReverseProxy(t *config.ProxyTransportCfg, l *config.LoadBa
 		},
 	}
 
-	rp.Director = func(req *http.Request) {
+	rp.Rewrite = func(preq *httputil.ProxyRequest) {
 		server := bl.Next()
 		if server == nil || server.URL == nil {
-			pm.logg.Warn("No server available for proxy", zap.String("url", req.URL.String()))
+			pm.logg.Warn("No server available for proxy",
+				zap.String("url", preq.In.URL.String()))
+			return
 		}
 
 		target, err := url.Parse(*server.URL)
 		if err != nil {
-			pm.logg.Warn("Invalid server URL", zap.String("url", *server.URL), zap.Error(err))
+			pm.logg.Warn("Invalid server URL",
+				zap.String("url", *server.URL),
+				zap.Error(err))
 			return
 		}
 
-		req.URL.Scheme = target.Scheme
-		req.URL.Host = target.Host
+		preq.SetURL(target)
 
 		if l.PassHostHeader != nil && *l.PassHostHeader {
-			req.Host = target.Host
+			preq.Out.Host = target.Host
 		}
+
+		preq.SetXForwarded()
 	}
 
 	rp.ModifyResponse = func(resp *http.Response) error {
