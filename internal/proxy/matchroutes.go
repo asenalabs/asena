@@ -19,7 +19,7 @@ func (pm *Manager) MatchRouter(r *http.Request) (string, bool, error) {
 	value := pm.RouterHolder.Load()
 	routers, ok := value.(map[string]*config.RoutersCfg)
 	if !ok || routers == nil {
-		return "", false, errors.New("no routers configured")
+		return "", false, nil
 	}
 
 	for _, router := range routers {
