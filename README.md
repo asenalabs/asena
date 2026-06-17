@@ -68,3 +68,9 @@ go test ./...
 * Middleware support (auth, rate-limit, etc.)
 * Metrics & observability integration
 * Health checks for upstream services
+
+## 🤝 Contributing
+
+Contributions are welcome!
+
+Please read the `CONTRIBUTING.md` and `CLA.md` before submitting a pull request.
