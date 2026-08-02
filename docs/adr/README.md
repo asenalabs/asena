@@ -16,6 +16,8 @@ From now on, try to write the ADR *before* or *while* you build the feature, not
 
 ## How to add a new ADR
 
+Before you start, please read [`CONTRIBUTING.md`](../../CONTRIBUTING.md) for the general rules of this project.
+
 1. Copy `template.md` in this folder.
 2. Give the new file the next number and a short name. Example: `0008-add-rate-limiting.md`
 3. Fill in the sections (see below).
