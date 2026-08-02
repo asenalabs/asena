@@ -30,7 +30,7 @@ func StartAsena() {
 	defer stop()
 
 	//	Initialize basic logger
-	logger.IntiFallbackZapLogger()
+	logger.InitFallbackZapLogger()
 	logg := logger.Get()
 
 	//	Load Asena Configurations

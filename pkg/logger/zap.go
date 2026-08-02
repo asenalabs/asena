@@ -18,7 +18,7 @@ type noSyncWriter struct {
 
 var logg *zap.Logger
 
-func IntiFallbackZapLogger() {
+func InitFallbackZapLogger() {
 	var zapCfg zap.Config
 	var encoder zapcore.Encoder
 

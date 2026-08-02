@@ -42,7 +42,7 @@ func TestGetLoggerPanics(t *testing.T) {
 }
 
 func TestGetLoggerReturnsLogger(t *testing.T) {
-	IntiFallbackZapLogger()
+	InitFallbackZapLogger()
 	logg := Get()
 	if logg == nil {
 		t.Fatal("expected non-nil logg")
@@ -50,7 +50,7 @@ func TestGetLoggerReturnsLogger(t *testing.T) {
 }
 
 func TestSyncDoesNotPanic(t *testing.T) {
-	IntiFallbackZapLogger()
+	InitFallbackZapLogger()
 	defer func() {
 		if r := recover(); r != nil {
 			t.Fatalf("Sync panicked: %v", r)
