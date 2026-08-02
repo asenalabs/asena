@@ -1,13 +1,7 @@
-<p align="center">
-  <img src="assets/logo.svg" alt="asena logo" width="350"/>
-</p>
+<img src="assets/logo.svg" alt="asena logo">
+asena is a lightweight web server with minimal configuration.
 
-<p align="center">
-    asena is a lightweight web server with minimal configuration.
-</p>
-
-
-##  🔹 About
+## 🔹 About
 
 Asena is a lightweight reverse proxy with minimal configuration. It provides basic host-based routing and load balancing out of the box.
 
@@ -22,9 +16,10 @@ Asena is a lightweight reverse proxy with minimal configuration. It provides bas
     * `asena.yaml` → **static** (read once at startup, no hot-reload)
     * `dynamic.yaml` → **dynamic** (supports hot-reload at runtime)
 
-
 ## 📦 Example Configuration
+
 `dynamic.yaml`:
+
 ```yaml
 http:
   routers:
@@ -50,10 +45,13 @@ go build -o ./bin/asena
 chmod +x ./scripts/install.sh
 sudo ./scripts/install.sh 
 ```
+
 Copy and paste the above dynamic test configuration into the `/etc/asena/dynamic.yaml` file
+
 ```bash
 sudo -u asena ./bin/asena -http-port :80
 ```
+
 By default, Asena loads configuration from `asena.yaml` and `dynamic.yaml`.
 
 ## 🧪 Tests
@@ -74,3 +72,5 @@ go test ./...
 Contributions are welcome!
 
 Please read the `CONTRIBUTING.md` and `CLA.md` before submitting a pull request.
+
+See [`docs/adr/`](docs/adr/) for the reasons behind key design decisions in this project.
