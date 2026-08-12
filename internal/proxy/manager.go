@@ -28,7 +28,7 @@ func NewProxyManger(logg *zap.Logger) *Manager {
 		logg: logg,
 	}
 	pm.ProxyHolder.Store(make(map[string]*httputil.ReverseProxy))
-	pm.RouterHolder.Store(make(map[string]*config.RoutersCfg))
+	pm.RouterHolder.Store([]Route{})
 
 	return pm
 }
@@ -50,11 +50,8 @@ func (pm *Manager) BuildReverseProxy(cfg *config.HTTPCfg, t *config.ProxyTranspo
 		pm.logg.Info("Reverse proxy built", zap.String("service", name), zap.String("algorithm", *group.LoadBalancer.Algorithm), zap.Int("services_count", len(group.LoadBalancer.Servers)))
 	}
 
-	newRouters := make(map[string]*config.RoutersCfg)
-	for name, router := range cfg.Routers {
-		newRouters[name] = router
-		pm.logg.Info("Router registered", zap.String("router", name), zap.String("rule", *router.Rule))
-	}
+	// Read and sort all rules once, here, at reload time.
+	newRouters := compileRoutes(cfg.Routers, pm.logg)
 
 	pm.mu.Lock()
 	pm.ProxyHolder.Store(newProxies)
