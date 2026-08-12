@@ -22,7 +22,7 @@ Routers define matching rules and map incoming requests to a service.
 
 | Field   | Type   | Description                                                                                                                                                 |
 |---------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| rule    | string | Matching expression (e.g. `Host`, `PathPrefix`, `Method`). Multiple can be combined with `&&` or <code>&#124;</code> (for now there is only `Host` matching)|
+| rule    | string | Matching expression built from one or more matchers, combined with `&&`, <code>&#124;&#124</code>,`!`, and parentheses for grouping. |
 | service | string | Name of the target service (must exist under `services`).                                                                                                   |
 
 #### Examples
@@ -32,10 +32,19 @@ http:
     api-router:
       rule: "Host(`localhost`)"
       service:  api-service
+    api-v2-writes:
+      rule: "Host(`api.example.com`) && PathPrefix(`/v2`) && !Method(`GET`)"
+      service: api-service
 ```
-Supported rule keywords:
-- `Host`
-- *coming soon...*
+Supported matchers:
+- ``Host(`example.com`)`` - matches the request's Host header, ignoring port and letter case.
+- ``PathPrefix(`/v2`)`` - matches when the request path starts with the given prefix.
+- ``Method(`GET`)`` - matches the HTTP method exactly (case-insensitive on input, normalized to uppercase).
+- ``Header(`X-Api-Key`, `secret`)`` - matches when the named header is present with exactly this value.
+
+Matchers can be combined with `&&` (AND), `||` (OR), `!` (NOT), and parentheses for grouping - `&&` binds tighter than `||`, the same as most C-family languages, so use parentheses when you want an OR to span an AND.
+
+When two or more routers' rules could both match the same request, the **more specific** rule wins — roughly: a `Header` match outranks a `Method` match, which outranks `PathPrefix`, which outranks a bare `Host` match, and combining matchers with `&&` always outranks any single one of them alone. This is computed automatically from the rule; you don't configure it directly.
 
 ### 2. Services
 Services define load-balancing to one or more upstream servers.
@@ -89,6 +98,8 @@ Common error messages include:
 ✅ On error:
 - Asena logs the detailed message via `zap.Logger`.
 - The server continues running with the **last valid configuration** to avoid downtime.
+
+**Note on invalid rules specifically:** an unparsable `rule` (e.g. a typo'd matcher name, or unbalanced parentheses) is *not* one of the reload-failing errors above. It's handled one level down: that single router is logged as skipped and excluded from matching, while the rest of a valid `dynamic.yaml` — every other router, and all services — reloads normally. A mistake in one team's router definition doesn't take down anyone else's.
 
 ---
 
