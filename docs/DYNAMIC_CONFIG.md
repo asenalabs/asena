@@ -22,7 +22,7 @@ Routers define matching rules and map incoming requests to a service.
 
 | Field   | Type   | Description                                                                                                                                                 |
 |---------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| rule    | string | Matching expression built from one or more matchers, combined with `&&`, <code>&#124;&#124</code>,`!`, and parentheses for grouping. |
+| rule    | string | Matching expression built from one or more matchers, combined with `&&`, <code>&#124;&#124;</code>, `!`, and parentheses for grouping. |
 | service | string | Name of the target service (must exist under `services`).                                                                                                   |
 
 #### Examples
