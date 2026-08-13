@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/asenalabs/asena/pkg/cli"
 	"github.com/fsnotify/fsnotify"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
@@ -21,11 +22,13 @@ type AsenaConfigService struct {
 	cfg            *AsenaConfig
 	logg           *zap.Logger
 	configFilePath string
+	cliOpts        *cli.Options
 }
 
-func NewAsenaConfigService(configFilePath string, logg *zap.Logger) (*AsenaConfigService, error) {
+func NewAsenaConfigService(configFilePath string, cliOpts *cli.Options, logg *zap.Logger) (*AsenaConfigService, error) {
 	acs := &AsenaConfigService{
 		configFilePath: configFilePath,
+		cliOpts:        cliOpts,
 		logg:           logg,
 	}
 
@@ -48,7 +51,7 @@ func (acs *AsenaConfigService) load() error {
 	}
 
 	//	Set and normalize configurations
-	err = setAsenaConfigs(&cfg, acs.configFilePath)
+	err = setAsenaConfigs(&cfg, acs.configFilePath, acs.cliOpts)
 	if err != nil {
 		return err
 	}
