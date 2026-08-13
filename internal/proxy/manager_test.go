@@ -23,7 +23,7 @@ func TestNewProxyManager_Init(t *testing.T) {
 		t.Error("expected ProxyHolder to contain map[string]*ReverseProxy")
 	}
 
-	if _, ok := pm.RouterHolder.Load().(map[string]*config.RoutersCfg); !ok {
+	if _, ok := pm.RouterHolder.Load().([]Route); !ok {
 		t.Error("expected RouterHolder to contain map[string]*RoutersCfg")
 	}
 }
@@ -34,7 +34,8 @@ func TestBuildReverseProxy_ValidConfig(t *testing.T) {
 	pm := NewProxyManger(logg)
 
 	algo := "round-robin"
-	rule := "Host(`/api`)"
+	rule := "Host(`a.com`)"
+	service := "api-service"
 	flash := 50 * time.Millisecond
 	passHost := true
 	urlStr := "http://127.0.0.1:8080"
@@ -52,7 +53,8 @@ func TestBuildReverseProxy_ValidConfig(t *testing.T) {
 		},
 		Routers: map[string]*config.RoutersCfg{
 			"api-router": {
-				Rule: &rule,
+				Rule:    &rule,
+				Service: &service,
 			},
 		},
 	}
@@ -82,6 +84,15 @@ func TestBuildReverseProxy_ValidConfig(t *testing.T) {
 	// check proxy exists
 	if rp, ok := pm.GetProxy("api-service"); !ok || rp == nil {
 		t.Fatal("expected proxy for api-service to exist")
+	}
+
+	// check route was compiled and stored
+	routes, ok := pm.RouterHolder.Load().([]Route)
+	if !ok {
+		t.Fatalf("expected 1 compiled route, got %d", len(routes))
+	}
+	if routes[0].Name != "api-router" || routes[0].Service != "api-service" {
+		t.Errorf("unexpected compiled route: %+v", routes[0])
 	}
 }
 
@@ -129,11 +140,17 @@ func TestReverseProxy_DirectorRewrite(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	req := httptest.NewRequest("GET", "http://original/path", nil)
-	rp.Director(req)
+	inReq := httptest.NewRequest("GET", "http://original/path", nil)
+	outerReq := inReq.Clone(inReq.Context())
+	preq := &httputil.ProxyRequest{In: inReq, Out: outerReq}
+
+	rp.Rewrite(preq)
 
 	u, _ := url.Parse(urlStr)
-	if req.URL.Host != u.Host {
-		t.Errorf("expected host %s, got %s", u.Host, req.URL.Host)
+	if preq.Out.URL.Host != u.Host {
+		t.Errorf("expected host %s, got %s", u.Host, preq.Out.URL.Host)
+	}
+	if passHost && preq.Out.Host != u.Host {
+		t.Errorf("expected Out.Host %s (PassHostHeader), got %s", u.Host, preq.Out.Host)
 	}
 }

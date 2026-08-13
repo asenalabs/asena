@@ -57,13 +57,14 @@ Use plain, simple sentences. Many readers of this project are not native English
 
 | # | Title | Status |
 | --- | ----- | ------ |
-| [0001](0001-two-tier-yaml-configuration.md) | Two-tier YAML configuration (static + dynamic) | Backfilled |
-| [0002](0002-structured-logging-zap-lumberjack.md) | Structured logging with Zap + Lumberjack | Backfilled |
-| [0003](0003-stdlib-flag-for-cli.md) | Standard library `flag` package for CLI args | Backfilled |
-| [0004](0004-pluggable-load-balancer.md) | Pluggable load balancer, round-robin default | Backfilled |
-| [0005](0005-dynamic-config-reload-mechanics.md) | fsnotify-based dynamic config reload | Backfilled |
-| [0006](0006-tls-hot-reload-and-fallback.md) | TLS hot-reload and fallback to HTTP | Backfilled |
-| [0007](0007-atomic-proxy-router-hot-swap.md) | Atomic proxy and router hot-swap | Accepted |
+| [0001](0001_two_tier_yaml_configuration.md) | Two-tier YAML configuration (static + dynamic) | Backfilled |
+| [0002](0002_structured_logging_zap_lumberjack.md) | Structured logging with Zap + Lumberjack | Backfilled |
+| [0003](0003_stdlib_flag_for_cli.md) | Standard library `flag` package for CLI args | Backfilled |
+| [0004](0004_pluggable_load_balancer.md) | Pluggable load balancer, round-robin default | Backfilled |
+| [0005](0005_dynamic_config_reload_mechanics.md) | fsnotify-based dynamic config reload | Backfilled |
+| [0006](0006_tls_hot_reload_and_fallback.md) | TLS hot-reload and fallback to HTTP | Backfilled |
+| [0007](0007_atomic_proxy_router_hot_swap.md) | Atomic proxy and router hot-swap | Accepted |
+| [0008](0008_ast_rule_engine.md)| AST-based rule engine for router matching | Accepted |
 
 ## When should I write a new ADR?
 
