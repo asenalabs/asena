@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/asenalabs/asena/pkg/cli"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 )
@@ -31,7 +32,7 @@ proxy_transport: {}
 		}
 	}()
 
-	svc, err := NewAsenaConfigService(tmpFile, zap.NewNop())
+	svc, err := NewAsenaConfigService(tmpFile, &cli.Options{}, zap.NewNop())
 	if err != nil {
 		t.Fatalf("NewAsenaConfigService() failed: %v", err)
 	}
@@ -64,7 +65,7 @@ asena:
 		}
 	}()
 
-	svc, err := NewAsenaConfigService(tmpFile, zap.NewNop())
+	svc, err := NewAsenaConfigService(tmpFile, &cli.Options{}, zap.NewNop())
 	if err != nil {
 		t.Fatalf("NewAsenaConfigService() failed: %v", err)
 	}
