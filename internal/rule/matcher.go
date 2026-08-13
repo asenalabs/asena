@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-// buildLeaf turns one matcher call, like "Host(`example.com`)", into a real matcher. This is the 
-// one place that turns a name into a type, so it is also the best place to give a clear error for 
+// buildLeaf turns one matcher call, like "Host(`example.com`)", into a real matcher. This is the
+// one place that turns a name into a type, so it is also the best place to give a clear error for
 // a bad name or a wrong number of arguments.
 func buildLeaf(raw string) (Node, error) {
 	name, args, err := parseFunc(raw)

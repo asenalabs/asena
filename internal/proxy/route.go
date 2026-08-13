@@ -9,8 +9,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// Route is one router, already fully read and ready to use: the rule text has already been 
-// turned into a rule. Node tree, and its specificity score has already been worked out. 
+// Route is one router, already fully read and ready to use: the rule text has already been
+// turned into a rule. Node tree, and its specificity score has already been worked out.
 // MatchRouter's job on each request is now simple: walk the list, call Tree.Match, stop at
 // the first hit.
 type Route struct {
@@ -21,14 +21,14 @@ type Route struct {
 	Specificity int
 }
 
-// compileRoutes turns the raw router config into a list of Route, sorted from most specific 
+// compileRoutes turns the raw router config into a list of Route, sorted from most specific
 // to least specific.
 //
-// We sort once here, when the config reloads, instead of on every request. A config reload 
-// happens rarely, a match happens many times per second. Any work we can do once instead of 
+// We sort once here, when the config reloads, instead of on every request. A config reload
+// happens rarely, a match happens many times per second. Any work we can do once instead of
 // every time is worth doing once.
 //
-// If a router has no rule, no service, or a rule that fails to read, we log a warning and 
+// If a router has no rule, no service, or a rule that fails to read, we log a warning and
 // skip just that router. One broken router should not stop the rest of the config from loading.
 func compileRoutes(routers map[string]*config.RoutersCfg, logg *zap.Logger) []Route {
 	routes := make([]Route, 0, len(routers))
