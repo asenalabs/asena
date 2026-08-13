@@ -1,7 +1,8 @@
 <p align="center">
   <img src="assets/logo.svg" alt="asena logo" width="400">
 </p>
-## 🔹 About
+
+## 🔹About
 
 Asena is a lightweight reverse proxy with minimal configuration. It provides basic host-based routing and load balancing out of the box.
 
