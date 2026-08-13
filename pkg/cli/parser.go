@@ -16,19 +16,20 @@ type Options struct {
 func Parse() *Options {
 	var opts Options
 
-	flag.StringVar(&opts.PortHTTP, "http-port", "", "HTTP port for Asena")
-	flag.StringVar(&opts.PortHTTPS, "https-port", "", "HTTPS port for Asena")
-	flag.StringVar(&opts.SSLTLSPublicKey, "cert-file", "", "Path to SSL/TLS certificate file")
-	flag.StringVar(&opts.SSLTLSPrivateKey, "key-file", "", "Path to SSL/TLS private key file")
+	fs := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	fs.StringVar(&opts.PortHTTP, "http-port", "", "HTTP port for Asena")
+	fs.StringVar(&opts.PortHTTPS, "https-port", "", "HTTPS port for Asena")
+	fs.StringVar(&opts.SSLTLSPublicKey, "cert-file", "", "Path to SSL/TLS certificate file")
+	fs.StringVar(&opts.SSLTLSPrivateKey, "key-file", "", "Path to SSL/TLS private key file")
 
-	flag.Usage = func() {
+	fs.Usage = func() {
 		fmt.Fprintf(os.Stderr, "\nUsage:\n    asena [flags]\n\nFlags:\n")
-		flag.PrintDefaults()
+		fs.PrintDefaults()
 	}
 
-	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
+	if err := fs.Parse(os.Args[1:]); err != nil {
 		fmt.Fprintf(os.Stderr, "Error:\t%v\n\n", err)
-		flag.Usage()
+		fs.Usage()
 		os.Exit(2)
 	}
 

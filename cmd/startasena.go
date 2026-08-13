@@ -13,12 +13,13 @@ import (
 	"github.com/asenalabs/asena/internal/middleware"
 	"github.com/asenalabs/asena/internal/proxy"
 	"github.com/asenalabs/asena/internal/server"
+	"github.com/asenalabs/asena/pkg/cli"
 	"github.com/asenalabs/asena/pkg/logger"
 	"go.uber.org/zap"
 )
 
 var (
-	version               = "0.2.4"
+	version               = "0.2.5"
 	env                   = "development" //	development | production
 	asenaConfigFilePath   = "/etc/asena/asena.yaml"
 	dynamicConfigFilePath = "/etc/asena/dynamic.yaml"
@@ -33,8 +34,11 @@ func StartAsena() {
 	logger.InitFallbackZapLogger()
 	logg := logger.Get()
 
+	// Parse CLI flags once, at startup
+	cliOpts := cli.Parse()
+
 	//	Load Asena Configurations
-	asenaConfigService, err := config.NewAsenaConfigService(asenaConfigFilePath, logg)
+	asenaConfigService, err := config.NewAsenaConfigService(asenaConfigFilePath, cliOpts, logg)
 	if err != nil {
 		logg.Fatal("Failed to initialize Asena configurations", zap.Error(err))
 	}

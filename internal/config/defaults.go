@@ -37,7 +37,7 @@ var (
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#`
 )
 
-func setAsenaConfigs(cfg *AsenaConfig, asenaConfigFile string) error {
+func setAsenaConfigs(cfg *AsenaConfig, asenaConfigFile string, cliOpts *cli.Options) error {
 	if cfg.Asena == nil {
 		cfg.Asena = &AsenaCfg{}
 	}
@@ -51,8 +51,7 @@ func setAsenaConfigs(cfg *AsenaConfig, asenaConfigFile string) error {
 		cfg.ProxyTransport = &ProxyTransportCfg{}
 	}
 
-	cliOptions := cli.Parse()
-	setVariablesGotFromCLI(cliOptions)
+	setVariablesGotFromCLI(cliOpts)
 
 	normalizeAsenaCfg(cfg.Asena)
 	normalizeLogCfg(cfg.Log)
