@@ -1,25 +1,18 @@
 package cli
 
 import (
-	"flag"
 	"os"
 	"testing"
 )
 
-func resetFlags() {
-	// Reset the default CommandLine flag set for each test
-	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-}
-
 func TestParse_AllFlagsProvided(t *testing.T) {
-	resetFlags()
 	os.Args = []string{
 		"asena",
 		"--http-port=:8080",
 		"--https-port=:8443",
 		"--cert-file=/path/cert.pem",
 		"--key-file=/path/key.pem",
-	}
+	} 
 
 	opts := Parse()
 
@@ -38,7 +31,7 @@ func TestParse_AllFlagsProvided(t *testing.T) {
 }
 
 func TestParse_NoFlagsProvided(t *testing.T) {
-	resetFlags()
+
 	os.Args = []string{"asena"}
 
 	opts := Parse()
