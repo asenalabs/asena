@@ -1,13 +1,13 @@
-<img src="assets/logo.svg" alt="asena logo">
-asena is a lightweight web server with minimal configuration.
-
+<p align="center">
+  <img src="assets/logo.svg" alt="asena logo" width="400">
+</p>
 ## 🔹 About
 
 Asena is a lightweight reverse proxy with minimal configuration. It provides basic host-based routing and load balancing out of the box.
 
 ## ✨ Features
 
-* **Reverse Proxy** with `Host(...)` based route matching
+* **Reverse Proxy** with  rule-based routing - `Host`, `PathPrefix`, `Method`, `Header`, combinable with `&&` / `||` / `!`
 * **Load Balancing** using round-robin algorithm
 * **TLS Support** with hot-reload on certificate changes (SIGHUP)
 * **HTTP Fallback** when TLS is invalid
@@ -62,7 +62,6 @@ go test ./...
 
 ## 📖 Roadmap
 
-* Support for advanced routing rules (`PathPrefix`, `Method`, `Header`)
 * Middleware support (auth, rate-limit, etc.)
 * Metrics & observability integration
 * Health checks for upstream services
