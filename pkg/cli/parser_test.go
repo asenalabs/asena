@@ -12,7 +12,7 @@ func TestParse_AllFlagsProvided(t *testing.T) {
 		"--https-port=:8443",
 		"--cert-file=/path/cert.pem",
 		"--key-file=/path/key.pem",
-	} 
+	}
 
 	opts := Parse()
 

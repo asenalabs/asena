@@ -101,8 +101,8 @@ func (p *parser) parseUnary() (Node, error) {
 	tok, ok := p.peek()
 	if ok && tok.Type == NOT {
 		p.pos++
-		// Calling parseUnary again (not parsePrimary) lets "!!Host(...)" parse too. 
-		// Nobody writes that on purpose, but it comes for free this way, so there is 
+		// Calling parseUnary again (not parsePrimary) lets "!!Host(...)" parse too.
+		// Nobody writes that on purpose, but it comes for free this way, so there is
 		// no need to block it.
 		child, err := p.parseUnary()
 		if err != nil {
@@ -127,7 +127,7 @@ func (p *parser) parsePrimary() (Node, error) {
 	case LPAREN:
 		p.pos++
 		// Going back to parseOr here is what makes parentheses able to override the normal order,
-		// whatever is inside "(...)" is read as its own full rule, then treated as one single 
+		// whatever is inside "(...)" is read as its own full rule, then treated as one single
 		// piece by whoever called us.
 		node, err := p.parseOr()
 		if err != nil {

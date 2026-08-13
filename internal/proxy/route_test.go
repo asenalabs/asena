@@ -30,7 +30,7 @@ func TestCompileRoutes_SkipsNilService(t *testing.T) {
 }
 
 func TestCompileRoutes_SkipsInvalidRuleButKeepsOthers(t *testing.T) {
-	// The important behavior here: ONE bad rule in the config must not prevent the other, 
+	// The important behavior here: ONE bad rule in the config must not prevent the other,
 	// valid routers from being compiled and served.
 	routers := map[string]*config.RoutersCfg{
 		"bad":  {Rule: strPtr("NotAMatcher(`x`)"), Service: strPtr("svc-bad")},
@@ -66,8 +66,8 @@ func TestCompileRoutes_SortedMostSpecificFirst(t *testing.T) {
 }
 
 func TestCompileRoutes_TieBreaksBySortedName(t *testing.T) {
-	// Both rules score the same (a single Host matcher, 15 either way). So the only thing that 
-	// decides the order is the name tie-break. We run this 20 times to make sure Go's random 
+	// Both rules score the same (a single Host matcher, 15 either way). So the only thing that
+	// decides the order is the name tie-break. We run this 20 times to make sure Go's random
 	// map order can't sneak in and change the result.
 	routers := map[string]*config.RoutersCfg{
 		"zebra": {Rule: strPtr("Host(`z.com`)"), Service: strPtr("svc-z")},
