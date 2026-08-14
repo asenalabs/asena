@@ -39,12 +39,14 @@ http:
 Supported matchers:
 - ``Host(`example.com`)`` - matches the request's Host header, ignoring port and letter case.
 - ``PathPrefix(`/v2`)`` - matches when the request path starts with the given prefix.
+- ``Path(`/health`)`` - matches when the request path is exactly equal to the given path (nothing may come after it).
 - ``Method(`GET`)`` - matches the HTTP method exactly (case-insensitive on input, normalized to uppercase).
 - ``Header(`X-Api-Key`, `secret`)`` - matches when the named header is present with exactly this value.
+- ``ClientIP(`203.0.113.5`)`` - matches a single client IP address, or ``ClientIP(`10.0.0.0/24`)`` for CIDR range. Reads the IP from the actual TCP connection, never from a header, so it can't be spoofed by the client.
 
 Matchers can be combined with `&&` (AND), `||` (OR), `!` (NOT), and parentheses for grouping - `&&` binds tighter than `||`, the same as most C-family languages, so use parentheses when you want an OR to span an AND.
 
-When two or more routers' rules could both match the same request, the **more specific** rule wins — roughly: a `Header` match outranks a `Method` match, which outranks `PathPrefix`, which outranks a bare `Host` match, and combining matchers with `&&` always outranks any single one of them alone. This is computed automatically from the rule; you don't configure it directly.
+When two or more routers' rules could both match the same request, the **more specific** rule wins — roughly: an exact `ClientIP` or `Path` match outranks `Header`, which outranks `Method`, which outranks a broad `ClientIP` range or `PathPrefix`, which outranks a bare `Host` match, and combining matchers with `&&` always outranks any single one of them alone. This is computed automatically from the rule; you don't configure it directly.
 
 ### 2. Services
 Services define load-balancing to one or more upstream servers.
