@@ -8,7 +8,7 @@ Asena is a lightweight reverse proxy with minimal configuration. It provides bas
 
 ## ✨ Features
 
-* **Reverse Proxy** with  rule-based routing - `Host`, `PathPrefix`, `Method`, `Header`, combinable with `&&` / `||` / `!`
+* **Reverse Proxy** with  rule-based routing - `Host`, `PathPrefix`, `Path`, `Method`, `Header`, `ClientIP`, combinable with `&&` / `||` / `!`
 * **Load Balancing** using round-robin algorithm
 * **TLS Support** with hot-reload on certificate changes (SIGHUP)
 * **HTTP Fallback** when TLS is invalid
