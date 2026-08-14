@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"net/http/httputil"
 	"net/url"
@@ -152,5 +153,78 @@ func TestReverseProxy_DirectorRewrite(t *testing.T) {
 	}
 	if passHost && preq.Out.Host != u.Host {
 		t.Errorf("expected Out.Host %s (PassHostHeader), got %s", u.Host, preq.Out.Host)
+	}
+}
+
+func TestServeProxy_NotFound(t *testing.T) {
+	logg := zaptest.NewLogger(t)
+	pm := NewProxyManger(logg)
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "http://example.com/", nil)
+
+	if ok := pm.ServeProxy("unknown-service", w, r); ok {
+		t.Error("expected ServeProxy to return false for an unknown service")
+	}
+}
+
+func TestServeProxy_RoundTripsToBackend(t *testing.T) {
+	// A real backend, not a mock: ServeProxy has to run the whole chain
+	// (Rewrite -> RoundTrip -> ModifyResponse -> reportDone) for real, so
+	// we want a real HTTP server on the other end to prove none of those
+	// steps panics or gets skipped.
+	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer backend.Close()
+
+	logg := zaptest.NewLogger(t)
+	pm := NewProxyManger(logg)
+
+	algo := "round-robin"
+	rule := "Host(`a.com`)"
+	service := "api-service"
+	flash := 50 * time.Millisecond
+	backendURL := backend.URL
+
+	cfg := &config.HTTPCfg{
+		Services: map[string]*config.ServiceCfg{
+			service: {
+				LoadBalancer: &config.LoadBalancerCfg{
+					Algorithm:     &algo,
+					Servers:       []*config.ServerCfg{{URL: &backendURL}},
+					FlashInterval: &flash,
+				},
+			},
+		},
+		Routers: map[string]*config.RoutersCfg{
+			"api-router": {Rule: &rule, Service: &service},
+		},
+	}
+
+	dialTimeout := time.Second
+	tlsMin := uint16(0x0303) // TLS1.2
+	tCfg := &config.ProxyTransportCfg{
+		DailTimeout:           &dialTimeout,
+		DailKeepalive:         &dialTimeout,
+		ForceHTTP2:            new(bool),
+		MaxIdleConn:           new(int),
+		MaxIdleConnPerHost:    new(int),
+		IdleConnTimeout:       &dialTimeout,
+		TLSHandshakeTimeout:   &dialTimeout,
+		ExpectContinueTimeout: &dialTimeout,
+		TLSMinVersion:         &tlsMin,
+	}
+
+	pm.BuildReverseProxy(cfg, tCfg)
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "http://a.com/", nil)
+
+	if ok := pm.ServeProxy(service, w, r); !ok {
+		t.Fatal("expected ServeProxy to find the service")
+	}
+	if w.Code != http.StatusOK {
+		t.Errorf("expected status 200 from backend, got %d", w.Code)
 	}
 }
