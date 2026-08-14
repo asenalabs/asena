@@ -2,6 +2,7 @@ package rule
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"strings"
 )
@@ -29,6 +30,12 @@ func buildLeaf(raw string) (Node, error) {
 		}
 		return &PathPrefixNode{prefix: args[0]}, nil
 
+	case "Path":
+		if len(args) != 1 {
+			return nil, fmt.Errorf("rule: Path expects exactly 1 argument, got %d in %q", len(args), raw)
+		}
+		return &PathNode{path: args[0]}, nil
+
 	case "Method":
 		if len(args) != 1 {
 			return nil, fmt.Errorf("rule: Method expects exactly 1 argument, got %d in %q", len(args), raw)
@@ -40,6 +47,12 @@ func buildLeaf(raw string) (Node, error) {
 			return nil, fmt.Errorf("rule: Header expects exactly 2 arguments (key, value), got %d in %q", len(args), raw)
 		}
 		return &HeaderNode{key: args[0], val: args[1]}, nil
+
+	case "ClientIP":
+		if len(args) != 1 {
+			return nil, fmt.Errorf("rule: ClientIP expects exactly 1 argument, got %d in %q", len(args), raw)
+		}
+		return newClientIPNode(args[0])
 
 	default:
 		return nil, fmt.Errorf("rule: unknown matcher %q in %q (supported: Host, PathPrefix, Method, Header)", name, raw)
@@ -76,6 +89,21 @@ func (n *PathPrefixNode) Match(r *http.Request) bool {
 // a long, exact one would look equally specific, which is wrong.
 func (n *PathPrefixNode) Specificity() int { return 20 + len(n.prefix) }
 
+// PathNode matches the request path is exactly equal to path. Unlike PathPrefixNode, nothing
+// may come after it, "/health" matches only "/health", not "/health/live".
+type PathNode struct {
+	path string
+}
+
+func (n *PathNode) Match(r *http.Request) bool {
+	return r.URL.Path == n.path
+}
+
+// Specificity uses the same length-based formula as PathPrefixNode, plus a flat +10 bonus.
+func (n *PathNode) Specificity() int {
+	return 30 + len(n.path)
+}
+
 // MethodNode matches the HTTP method (GET, POST, ...).
 type MethodNode struct{ method string }
 
@@ -96,6 +124,75 @@ func (n *HeaderNode) Match(r *http.Request) bool {
 // Specificity is the highest of the four. A header match needs the caller to know and send an
 // exact value, so it's the narrowest and most deliberate check a request can carry.
 func (n *HeaderNode) Specificity() int { return 30 }
+
+// ClientIPNode matches when the request's source IP falls inside a range,
+// or equals a single address exactly.
+//
+// Exactly one of the two fields below is set, decided once, when the rule is first read, in newClientIPNode.
+// Match and Specificity only ever look at whichever one is non-nil, they never re-parse the original text.
+type ClientIPNode struct {
+	single net.IP     // set when the rule was one plain address, e.g. "203.0.113.5"
+	ipNet  *net.IPNet // set when the rule was a CIDR range, e.g. "10.0.0.0/24"
+}
+
+// newClientIPNode decides, once, whether raw is a single address or a CIDR range, and parses it accordingly.
+// A "/" in the text is the only single we need, IP addresses never contain one, CIDR ranges aslways do.
+func newClientIPNode(raw string) (*ClientIPNode, error) {
+	if strings.Contains(raw, "/") {
+		_, ipNet, err := net.ParseCIDR(raw)
+		if err != nil {
+			return nil, fmt.Errorf("rule: invalid CIDR %q in ClientIP: %w", raw, err)
+		}
+		return &ClientIPNode{ipNet: ipNet}, nil
+	}
+
+	ip := net.ParseIP(raw)
+	if ip == nil {
+		return nil, fmt.Errorf("rule: invalid IP address %q in ClientIP", raw)
+	}
+
+	return &ClientIPNode{single: ip}, nil
+}
+
+// Match reads the client's address straight from the TCP connection (r.RemoteAddr), never from a header like X-Forwarded-For.
+// A header is just text the client sent, anyone can put any value in it. RemoteAddr is not, it isthe actual socket Go accepted
+// the connection on, so it cannot be spoofed the way a header can.
+func (n *ClientIPNode) Match(r *http.Request) bool {
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		host = r.RemoteAddr
+	}
+
+	ip := net.ParseIP(host)
+	if ip == nil {
+		return false
+	}
+
+	if n.ipNet != nil {
+		return n.ipNet.Contains(ip)
+	}
+
+	return ip.Equal(n.single)
+}
+
+// Specificity counts how many bits of the address are actually pinned down, the same as PathPrefixNode counting characters.
+// A /24 range fixes 24 bits and leaves 8 free, covering 256 addresses; a/8 fixes only 8 bits and covers 16 million. The more bits fixed,
+// the narrower the range, the higher the score, exactly like a longer PathPrefix.
+//
+// A single exact address (no "/" in the rule) fixes every bit there is, so it is treated the same as the narrowest possible range : /32 for
+// an IPv4 address, /128 for IPv6.
+func (n *ClientIPNode) Specificity() int {
+	if n.ipNet != nil {
+		ones, _ := n.ipNet.Mask.Size()
+		return ones
+	}
+
+	if n.single.To4() != nil {
+		return 32
+	}
+
+	return 128
+}
 
 // parseFunc splits a matcher call, like "Host(`example.com`)", into its
 // name ("Host") and its arguments (["example.com"]).
