@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"net"
@@ -9,12 +10,31 @@ import (
 	"net/url"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/asenalabs/asena/internal/config"
 	"github.com/asenalabs/asena/internal/proxy/balancer"
 	"github.com/asenalabs/asena/pkg/logger"
 	"go.uber.org/zap"
 )
+
+// balancerResultKey is the context key for balancerResult. It's an unexported
+// empty struct type, so nothing outside this package can collide with it or
+// read/write it directly, only the helpers below can.
+type balancerResultKey struct{}
+
+// balancerResult is a small mutable "box" carried on the request context.
+//
+// Why a box instead of just storing values with context.WithValue at the point we
+// learn them? Because httputil.ReverseProxy clones the request *before*
+// calling Rewrite, and its ErrorHandler is later called with the ORIGINAL request,
+// not the clone. A new context value created inside Rewrite would only be visible
+// on the clone, so the error path would never see it. A box created up front and
+// shared by both is visible everywhere, and Rewrite just fills in its fields.
+type balancerResult struct {
+	server    *config.ServerCfg
+	startTime time.Time
+}
 
 type Manager struct {
 	ProxyHolder  atomic.Value
@@ -83,11 +103,18 @@ func (pm *Manager) newReverseProxy(t *config.ProxyTransportCfg, l *config.LoadBa
 	}
 
 	rp.Rewrite = func(preq *httputil.ProxyRequest) {
-		server := bl.Next()
+		server := bl.Next(preq.In)
 		if server == nil || server.URL == nil {
 			pm.logg.Warn("No server available for proxy",
 				zap.String("url", preq.In.URL.String()))
 			return
+		}
+
+		// If ServeProxy set up a result box on this request, record which server we picked and when,
+		// so ModifyResponse/ErrorHandler can report back to the balancer once the request finishes.
+		if result, ok := preq.In.Context().Value(balancerResultKey{}).(*balancerResult); ok {
+			result.server = server
+			result.startTime = time.Now()
 		}
 
 		target, err := url.Parse(*server.URL)
@@ -108,6 +135,8 @@ func (pm *Manager) newReverseProxy(t *config.ProxyTransportCfg, l *config.LoadBa
 	}
 
 	rp.ModifyResponse = func(resp *http.Response) error {
+		reportDone(bl, resp.Request, nil)
+
 		resp.Header.Set("X-Content-Type-Options", "nosniff")
 		resp.Header.Set("X-Frame-Options", "DENY")
 
@@ -119,6 +148,19 @@ func (pm *Manager) newReverseProxy(t *config.ProxyTransportCfg, l *config.LoadBa
 	}
 
 	return rp, nil
+}
+
+// reportDone reads the balancer result box of r's context (if ServeProxy set one up)
+// and reports the outcome back to the balancer. It's called from both ModifyResponse
+// (success) and ErrorHandler (failure), so every request reports exactly once, no
+// matter how it ends.
+func reportDone(bl balancer.Balancer, r *http.Request, err error) {
+	result, ok := r.Context().Value(balancerResultKey{}).(*balancerResult)
+	if !ok || result.server == nil {
+		return
+	}
+
+	bl.Done(result.server, time.Since(result.startTime), err)
 }
 
 func newProxyTransport(t *config.ProxyTransportCfg) *http.Transport {
@@ -149,4 +191,26 @@ func (pm *Manager) GetProxy(serviceName string) (*httputil.ReverseProxy, bool) {
 
 	rp, exists := proxies[serviceName]
 	return rp, exists
+}
+
+// ServeProxy serves r through the named service's reverse proxy.
+//
+// This is the only place we set up the balancer result box, and we do it BEFORE calling ServeHTTP.
+//
+//	That matters: httputil.ReverseProxy clones the request internally, and the clone starts out
+//
+// sharing the same context as the original. Setting the box up front, before the clone happens, is what
+// lets Rewrite (which sees the clone) and ErrorHandler (which sees the original) both reach the same
+// box. See balancerResult's doc comment for the full story.
+//
+// Callers that used to do `rp, _ := pm.GetProxy(name); rp.ServeHTTP(w, r)` should call this instead.
+func (pm *Manager) ServeProxy(serviceName string, w http.ResponseWriter, r *http.Request) bool {
+	rp, ok := pm.GetProxy(serviceName)
+	if !ok || rp == nil {
+		return false
+	}
+
+	ctx := context.WithValue(r.Context(), balancerResultKey{}, &balancerResult{})
+	rp.ServeHTTP(w, r.WithContext(ctx))
+	return true
 }
