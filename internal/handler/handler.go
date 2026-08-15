@@ -22,13 +22,10 @@ func RegisterRoutes(pm *proxy.Manager, mux *http.ServeMux, logg *zap.Logger) {
 			return
 		}
 
-		targetProxy, ok := pm.GetProxy(serviceName)
-		if !ok {
+		if ok := pm.ServeProxy(serviceName, w, r); !ok {
 			logg.Warn("No routing rule found for service", zap.String("service", serviceName))
 			http.Error(w, "404 page not found", http.StatusNotFound)
 			return
 		}
-
-		targetProxy.ServeHTTP(w, r)
 	})
 }

@@ -15,7 +15,7 @@ func strPtr(s string) *string {
 
 func TestRoundRobin_Empty(t *testing.T) {
 	rr := NewRoundRobin(nil)
-	require.Nil(t, rr.Next())
+	require.Nil(t, rr.Next(nil))
 }
 
 func TestRoundRobin_Sequence(t *testing.T) {
@@ -26,7 +26,7 @@ func TestRoundRobin_Sequence(t *testing.T) {
 
 	want := []string{"s2", "s3", "s1", "s2", "s3", "s1"}
 	for i, w := range want {
-		got := rr.Next()
+		got := rr.Next(nil)
 		require.NotNil(t, got)
 		require.Equal(t, w, *got.URL, "step %d", i)
 	}
@@ -37,7 +37,7 @@ func TestRoundRobin_CounterWrap(t *testing.T) {
 	rr := NewRoundRobin(servers)
 
 	atomic.AddUint64(&rr.counter, ^uint64(0)-1)
-	require.Equal(t, "only", *rr.Next().URL)
+	require.Equal(t, "only", *rr.Next(nil).URL)
 }
 
 func TestRoundRobin_Concurrent(t *testing.T) {
@@ -59,7 +59,7 @@ func TestRoundRobin_Concurrent(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			for j := 0; j < iterations; j++ {
-				if srv := rr.Next(); srv != nil {
+				if srv := rr.Next(nil); srv != nil {
 					results <- *srv.URL
 				}
 			}
