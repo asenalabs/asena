@@ -25,6 +25,8 @@ func New(algorithm string, servers []*config.ServerCfg) Balancer {
 	switch algorithm {
 	case config.RoundRobin:
 		return NewRoundRobin(servers)
+	case config.WeightedRoundRobin:
+		return NewWeightedRoundRobin(servers)
 	default:
 		return NewRoundRobin(servers) // default fallback
 	}

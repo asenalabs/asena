@@ -116,6 +116,7 @@ func TestValidateServiceCfg(t *testing.T) {
 func TestValidateServiceAlgorithm(t *testing.T) {
 	badAlg := "no-algorithm"
 	goodAlg := RoundRobin
+	goodWeightedAlg := WeightedRoundRobin
 
 	tests := []struct {
 		name    string
@@ -125,6 +126,7 @@ func TestValidateServiceAlgorithm(t *testing.T) {
 		{"nil algorithm", nil, "algorithm is not set"},
 		{"unknown algorithm", &badAlg, "unknown algorithm"},
 		{"valid algorithm", &goodAlg, ""},
+		{"valid weighted algorithm", &goodWeightedAlg, ""},
 	}
 
 	for _, tt := range tests {

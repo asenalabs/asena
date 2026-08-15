@@ -53,7 +53,7 @@ Services define load-balancing to one or more upstream servers.
 
 | Field            | Type   | Description                                                                                                                            |
 |------------------|--------|----------------------------------------------------------------------------------------------------------------------------------------|
-| algorithm        | string | Load balancing algorithm. Supported: `round-robin`(default)/(`weighted-round-robin`,`least-connections` and others are coming soon...) | 
+| algorithm        | string | Load balancing algorithm. Supported: `round-robin`(default), `weighted-round-robin` (`least-connections` and others are coming soon...) | 
 | flash_interval   | string | How often server weights/health are refreshed (e.g. `500ms`, `10s`).                                                                   |
 | pass_host_header | bool   | Forward original `Host` header to backend.                                                                                             |
 | servers          | list   | Array of backend servers with `url` (and optional `weight`).                                                                           |
@@ -71,7 +71,19 @@ http:
           - url: "http://localhost:9000"
           - url: "http://localhost:9001"
 ```
-
+With `weighted-round-robin`, each server can set its own `weight` (defaults to `1` if omitted). A server with weight `5` receives roughly 5x the traffic of a server with weight `1`:
+```yaml
+http:
+  services:
+    api-service:
+      load_balancer:
+        algorithm: weighted-round-robin
+        servers:
+          - url: "http://localhost:9000"
+            weight: 5
+          - url: "http://localhost:9001"
+            weight: 1
+```
 ---
 
 ## Fallback Behavior

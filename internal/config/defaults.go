@@ -147,8 +147,8 @@ func setVariablesGotFromCLI(opts *cli.Options) {
 // ============================== Dynamic ==============================
 
 var (
-	RoundRobin = "round-robin"
-	//WeightedRoundRobin = "weighted-round-robin"
+	RoundRobin          = "round-robin"
+	WeightedRoundRobin  = "weighted-round-robin"
 	flashInterval       = 500 * time.Millisecond
 	passHostHeaderFalse = false
 )
@@ -200,8 +200,8 @@ func validateServiceAlgorithm(alg *string) error {
 	}
 
 	algorithms := map[string]uint{
-		RoundRobin: 1,
-		// WeightedRoundRobin: 2,
+		RoundRobin:         1,
+		WeightedRoundRobin: 2,
 	}
 
 	if _, found := algorithms[*alg]; !found {
