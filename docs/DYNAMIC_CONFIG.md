@@ -53,7 +53,7 @@ Services define load-balancing to one or more upstream servers.
 
 | Field            | Type   | Description                                                                                                                            |
 |------------------|--------|----------------------------------------------------------------------------------------------------------------------------------------|
-| algorithm        | string | Load balancing algorithm. Supported: `round-robin`(default), `weighted-round-robin` (`least-connections` and others are coming soon...) | 
+| algorithm        | string | Load balancing algorithm. Supported: `round-robin`(default), `weighted-round-robin`, `least-connections`, ( others are coming soon...) | 
 | flash_interval   | string | How often server weights/health are refreshed (e.g. `500ms`, `10s`).                                                                   |
 | pass_host_header | bool   | Forward original `Host` header to backend.                                                                                             |
 | servers          | list   | Array of backend servers with `url` (and optional `weight`).                                                                           |
@@ -83,6 +83,17 @@ http:
             weight: 5
           - url: "http://localhost:9001"
             weight: 1
+```
+With `least-connections`, no extra per-server fields are needed - Asena tracks how many requests are currently in flight to each server and sends the next one to whichever has the fewest:
+```yaml
+http:
+  services:
+    api-service:
+      load_balancer:
+        algorithm: least-connections
+        servers:
+          - url: "http://localhost:9000"
+          - url: "http://localhost:9001"
 ```
 ---
 
