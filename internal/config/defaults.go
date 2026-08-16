@@ -149,6 +149,7 @@ func setVariablesGotFromCLI(opts *cli.Options) {
 var (
 	RoundRobin          = "round-robin"
 	WeightedRoundRobin  = "weighted-round-robin"
+	LeastConnections    = "least-connections"
 	flashInterval       = 500 * time.Millisecond
 	passHostHeaderFalse = false
 )
@@ -202,6 +203,7 @@ func validateServiceAlgorithm(alg *string) error {
 	algorithms := map[string]uint{
 		RoundRobin:         1,
 		WeightedRoundRobin: 2,
+		LeastConnections:   3,
 	}
 
 	if _, found := algorithms[*alg]; !found {
