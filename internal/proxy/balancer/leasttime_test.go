@@ -15,9 +15,9 @@ func TestLeastTime_Empty(t *testing.T) {
 }
 
 func TestLeastTime_ColdStartSpreadsAcrossUntestedServers(t *testing.T) {
-	// None of these servers have reported back yet, so their scores all start at 0. 
-	// If Next() only looked at average time, it would send all three of these picks 
-	// to the same server. Because active connections count too, each pick should 
+	// None of these servers have reported back yet, so their scores all start at 0.
+	// If Next() only looked at average time, it would send all three of these picks
+	// to the same server. Because active connections count too, each pick should
 	// move to a different server.
 	servers := []*config.ServerCfg{
 		{URL: strPtr("s1")}, {URL: strPtr("s2")}, {URL: strPtr("s3")},
