@@ -65,6 +65,7 @@ Use plain, simple sentences. Many readers of this project are not native English
 | [0006](0006_tls_hot_reload_and_fallback.md) | TLS hot-reload and fallback to HTTP | Backfilled |
 | [0007](0007_atomic_proxy_router_hot_swap.md) | Atomic proxy and router hot-swap | Accepted |
 | [0008](0008_ast_rule_engine.md)| AST-based rule engine for router matching | Accepted |
+| [0009](0009_request_aware_balancer_interface.md) | Request-aware Balancer interface and a `Done()` completion hook | Accepted |
 
 ## When should I write a new ADR?
 
