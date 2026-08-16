@@ -1,6 +1,7 @@
 ## ADR-0004: Pluggable load balancer, round-robin default
 
 * **Status:** Accepted (backfilled - this ADR was written after the code already existed)
+* **Note: The `Balancer` interface shown in Decision was extended in ADR-0009 to add request-awareness and a `Done()` completion hook. The pluggable-factory design described below is unchanged.
 
 ## Context
 
