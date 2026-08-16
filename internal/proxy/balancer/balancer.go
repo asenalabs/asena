@@ -27,6 +27,8 @@ func New(algorithm string, servers []*config.ServerCfg) Balancer {
 		return NewRoundRobin(servers)
 	case config.WeightedRoundRobin:
 		return NewWeightedRoundRobin(servers)
+	case config.LeastConnections:
+		return NewLeastConnections(servers)
 	default:
 		return NewRoundRobin(servers) // default fallback
 	}
