@@ -118,6 +118,7 @@ func TestValidateServiceAlgorithm(t *testing.T) {
 	goodAlg := RoundRobin
 	goodWeightedAlg := WeightedRoundRobin
 	goodLeastConnAlg := LeastConnections
+	goodLeastTimeAlg := LeastTime
 
 	tests := []struct {
 		name    string
@@ -129,6 +130,7 @@ func TestValidateServiceAlgorithm(t *testing.T) {
 		{"valid algorithm", &goodAlg, ""},
 		{"valid weighted algorithm", &goodWeightedAlg, ""},
 		{"valid least connecttions algorithm", &goodLeastConnAlg, ""},
+		{"valid least time algorithm", &goodLeastTimeAlg, ""},
 	}
 
 	for _, tt := range tests {
