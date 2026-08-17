@@ -45,6 +45,10 @@ func New(algorithm string, servers []*config.ServerCfg) Balancer {
 		return NewLeastTime(servers)
 	case config.IPHash:
 		return NewIPHash(servers)
+	case config.StickySession:
+		return NewStickySession(servers)
+	case config.ConsistentHash:
+		return NewConsistentHash(servers)
 	default:
 		return NewRoundRobin(servers) // default fallback
 	}

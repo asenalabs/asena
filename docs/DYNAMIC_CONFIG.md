@@ -53,7 +53,7 @@ Services define load-balancing to one or more upstream servers.
 
 | Field            | Type   | Description                                                                                                                            |
 |------------------|--------|----------------------------------------------------------------------------------------------------------------------------------------|
-| algorithm        | string | Load balancing algorithm. Supported: `round-robin`(default), `weighted-round-robin`, `least-connections`, `least-time`, `ip-hash`, `sticky-session`, ( others are coming soon...) | 
+| algorithm        | string | Load balancing algorithm. Supported: `round-robin`(default), `weighted-round-robin`, `least-connections`, `least-time`, `ip-hash`, `sticky-session`, `consistent-hash` | 
 | flash_interval   | string | How often server weights/health are refreshed (e.g. `500ms`, `10s`).                                                                   |
 | pass_host_header | bool   | Forward original `Host` header to backend.                                                                                             |
 | servers          | list   | Array of backend servers with `url` (and optional `weight`).                                                                           |
@@ -124,6 +124,17 @@ http:
     api-service:
       load_balancer:
         algorithm: sticky-session
+        servers:
+          - url: "http://localhost:9000"
+          - url: "http://localhost:9001"
+```
+With `consistent-hash`, clients are mapped to servers the same way as `ip-hash`, but adding or removing a server only reassigns a small fraction of clients instead of nearly all of them. Measured directly on this implementation: going from 3 to 4 servers moved ~75% of clients under `ip-hash`, versus ~16% under `consistent-hash`, for the same 5000 synthetic client IPs (see `consistenthash_test.go`). Note: with only a handful of servers, the traffic split across them can still be visibly uneven by chance - this evens out as the number of real servers grows, and is a known trade-off of consistent hashing at small scale, not a bug.
+```yaml
+http:
+  services:
+    api-service:
+      load_balancer:
+        algorithm: consistent-hash
         servers:
           - url: "http://localhost:9000"
           - url: "http://localhost:9001"
