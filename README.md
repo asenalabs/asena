@@ -36,6 +36,7 @@ http:
           - url: "http://localhost:9000"
           - url: "http://localhost:9001"
 ```
+Additional load-balancing algorithms can be found in the [`DYNAMIC CONFIG`](docs/DYNAMIC_CONFIG.md) file.
 
 ## 🚀 Quick Start
 
