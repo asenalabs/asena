@@ -151,6 +151,7 @@ var (
 	WeightedRoundRobin  = "weighted-round-robin"
 	LeastConnections    = "least-connections"
 	LeastTime           = "least-time"
+	IPHash              = "ip-hash"
 	flashInterval       = 500 * time.Millisecond
 	passHostHeaderFalse = false
 )
@@ -206,6 +207,7 @@ func validateServiceAlgorithm(alg *string) error {
 		WeightedRoundRobin: 2,
 		LeastConnections:   3,
 		LeastTime:          4,
+		IPHash:             5,
 	}
 
 	if _, found := algorithms[*alg]; !found {
