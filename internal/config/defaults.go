@@ -152,6 +152,7 @@ var (
 	LeastConnections    = "least-connections"
 	LeastTime           = "least-time"
 	IPHash              = "ip-hash"
+	StickySession       = "sticky-session"
 	flashInterval       = 500 * time.Millisecond
 	passHostHeaderFalse = false
 )
@@ -208,6 +209,7 @@ func validateServiceAlgorithm(alg *string) error {
 		LeastConnections:   3,
 		LeastTime:          4,
 		IPHash:             5,
+		StickySession:      6,
 	}
 
 	if _, found := algorithms[*alg]; !found {
