@@ -53,7 +53,7 @@ Services define load-balancing to one or more upstream servers.
 
 | Field            | Type   | Description                                                                                                                            |
 |------------------|--------|----------------------------------------------------------------------------------------------------------------------------------------|
-| algorithm        | string | Load balancing algorithm. Supported: `round-robin`(default), `weighted-round-robin`, `least-connections`, `least-time`, `ip-hash`, ( others are coming soon...) | 
+| algorithm        | string | Load balancing algorithm. Supported: `round-robin`(default), `weighted-round-robin`, `least-connections`, `least-time`, `ip-hash`, `sticky-session`, ( others are coming soon...) | 
 | flash_interval   | string | How often server weights/health are refreshed (e.g. `500ms`, `10s`).                                                                   |
 | pass_host_header | bool   | Forward original `Host` header to backend.                                                                                             |
 | servers          | list   | Array of backend servers with `url` (and optional `weight`).                                                                           |
@@ -113,6 +113,17 @@ http:
     api-service:
       load_balancer:
         algorithm: ip-hash
+        servers:
+          - url: "http://localhost:9000"
+          - url: "http://localhost:9001"
+```
+With `sticky-session`, Asena sets a cookie (`asena_sticky`, 1 hour TTL) pinning a client to whichever server first handles their request; first-time visitors are spread across servers with round robin. No extra per-server fields needed. Known limitation: Asena doesn't have health checking yet, so a client pinned to a server that goes down stays pinned to it until their cookie expires.
+```yaml
+http:
+  services:
+    api-service:
+      load_balancer:
+        algorithm: sticky-session
         servers:
           - url: "http://localhost:9000"
           - url: "http://localhost:9001"
