@@ -136,6 +136,7 @@ func (pm *Manager) newReverseProxy(t *config.ProxyTransportCfg, l *config.LoadBa
 
 	rp.ModifyResponse = func(resp *http.Response) error {
 		reportDone(bl, resp.Request, nil)
+		applyStickyCookie(bl, resp)
 
 		resp.Header.Set("X-Content-Type-Options", "nosniff")
 		resp.Header.Set("X-Frame-Options", "DENY")
@@ -161,6 +162,26 @@ func reportDone(bl balancer.Balancer, r *http.Request, err error) {
 	}
 
 	bl.Done(result.server, time.Since(result.startTime), err)
+}
+
+// applyStickyCookie lets a balancer write something onto a successful response - currently
+// only used by Sticky Sessions, to set the cookie that pins a client to the server that
+// just handled their request.
+//
+// This only runs from ModifyResponse (the success path), not ErrorHandler:
+// we don't want to freshly pin a client to a server that just failed.
+func applyStickyCookie(bl balancer.Balancer, resp *http.Response) {
+	setter, ok := bl.(balancer.StickyCookieSetter)
+	if !ok {
+		return
+	}
+
+	result, ok := resp.Request.Context().Value(balancerResultKey{}).(*balancerResult)
+	if !ok || result.server == nil {
+		return
+	}
+
+	setter.SetStickyCookie(resp.Header, result.server)
 }
 
 func newProxyTransport(t *config.ProxyTransportCfg) *http.Transport {
