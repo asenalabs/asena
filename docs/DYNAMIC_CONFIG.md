@@ -53,7 +53,7 @@ Services define load-balancing to one or more upstream servers.
 
 | Field            | Type   | Description                                                                                                                            |
 |------------------|--------|----------------------------------------------------------------------------------------------------------------------------------------|
-| algorithm        | string | Load balancing algorithm. Supported: `round-robin`(default), `weighted-round-robin`, `least-connections`, `least-time`, ( others are coming soon...) | 
+| algorithm        | string | Load balancing algorithm. Supported: `round-robin`(default), `weighted-round-robin`, `least-connections`, `least-time`, `ip-hash`, ( others are coming soon...) | 
 | flash_interval   | string | How often server weights/health are refreshed (e.g. `500ms`, `10s`).                                                                   |
 | pass_host_header | bool   | Forward original `Host` header to backend.                                                                                             |
 | servers          | list   | Array of backend servers with `url` (and optional `weight`).                                                                           |
@@ -102,6 +102,17 @@ http:
     api-service:
       load_balancer:
         algorithm: least-time
+        servers:
+          - url: "http://localhost:9000"
+          - url: "http://localhost:9001"
+```
+With `ip-hash`, the same client IP always lands on the same server, useful for in-memory session state without cookies. Note: adding or removing a server reshuffles most clients to a different backend, since it changes the hash-to-server mapping for everyone - keep the server list stable if this matters for your use case.
+```yaml
+http:
+  services:
+    api-service:
+      load_balancer:
+        algorithm: ip-hash
         servers:
           - url: "http://localhost:9000"
           - url: "http://localhost:9001"
